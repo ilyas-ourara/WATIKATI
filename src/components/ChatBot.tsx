@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Header from './Header';
 import ChatMessage from './ChatMessage';
 import ChatInput from './ChatInput';
+import { useThinkingSound } from '../hooks/useThinkingSound';
 
 interface Message {
   id: number;
@@ -22,6 +23,7 @@ const ChatBot = () => {
   ]);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { playThinkingSound } = useThinkingSound();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -30,6 +32,13 @@ const ChatBot = () => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Jouer le son quand le bot commence à réfléchir
+  useEffect(() => {
+    if (isLoading) {
+      playThinkingSound();
+    }
+  }, [isLoading, playThinkingSound]);
 
   const getBotResponse = (userMessage: string): string => {
     const responses = [
