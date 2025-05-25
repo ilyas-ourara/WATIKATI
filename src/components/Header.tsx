@@ -10,7 +10,7 @@ const Header = () => {
             <span className="text-black font-bold text-sm">WATI</span>
           </div>
           <div>
-            <h1 className="text-xl font-bold text-white">HackAI Chat</h1>
+            <h1 className="text-xl font-bold text-white">WATIKATI AI</h1>
             <p className="text-cyber-green text-sm">Assistant IA Intelligent</p>
           </div>
         </div>
