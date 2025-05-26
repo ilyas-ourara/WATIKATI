@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import Header from './Header';
 import ChatMessage from './ChatMessage';
@@ -16,7 +15,7 @@ const ChatBot = () => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: 1,
-      text: "Bonjour ! Je suis votre assistant IA. Comment puis-je vous aider aujourd'hui ?",
+      text: "سلام! أنا المساعد الإداري ديالك، واش كاين شي حاجة نعاونك فيها اليوم؟",
       isBot: true,
       timestamp: new Date()
     }
@@ -40,27 +39,7 @@ const ChatBot = () => {
     }
   }, [isLoading, playThinkingSound]);
 
-  const getBotResponse = (userMessage: string): string => {
-    const responses = [
-      "C'est une excellente question ! Laissez-moi réfléchir à cela...",
-      "Je comprends votre demande. Voici ce que je peux vous dire...",
-      "Intéressant ! Basé sur votre question, je pense que...",
-      "Merci pour votre question. Voici ma réponse...",
-      "C'est un sujet fascinant ! Permettez-moi de vous expliquer...",
-    ];
-    
-    if (userMessage.toLowerCase().includes('bonjour') || userMessage.toLowerCase().includes('salut')) {
-      return "Bonjour ! Ravi de vous rencontrer. Comment puis-je vous aider aujourd'hui ?";
-    }
-    
-    if (userMessage.toLowerCase().includes('merci')) {
-      return "Je vous en prie ! N'hésitez pas si vous avez d'autres questions.";
-    }
-    
-    return responses[Math.floor(Math.random() * responses.length)] + " " + 
-           "En tant qu'IA, je suis conçu pour vous aider avec diverses tâches et répondre à vos questions de manière utile et précise.";
-  };
-
+  // Appel à l'API backend pour obtenir la réponse du bot
   const handleSendMessage = async (messageText: string) => {
     // Ajouter le message de l'utilisateur
     const userMessage: Message = {
@@ -73,22 +52,51 @@ const ChatBot = () => {
     setMessages(prev => [...prev, userMessage]);
     setIsLoading(true);
 
-    // Simuler un délai de réponse du bot
-    setTimeout(() => {
+    try {
+      // Préparer l'historique pour le backend
+      const history = messages.map(m => ({
+        role: m.isBot ? "assistant" : "user",
+        content: m.text
+      }));
+
+      const response = await fetch('http://localhost:8000/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          history: history,
+          user_input: messageText
+        }),
+      });
+
+      const data = await response.json();
+
       const botResponse: Message = {
         id: Date.now() + 1,
-        text: getBotResponse(messageText),
+        text: data.reply,
         isBot: true,
         timestamp: new Date()
       };
 
       setMessages(prev => [...prev, botResponse]);
+    } catch (error) {
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 2,
+          text: "Erreur lors de la communication avec le serveur.",
+          isBot: true,
+          timestamp: new Date()
+        }
+      ]);
+    } finally {
       setIsLoading(false);
-    }, 1000 + Math.random() * 2000); // Délai aléatoire entre 1-3 secondes
+    }
   };
 
   return (
-    <div className="h-screen bg-gradient-cyber flex flex-col">
+     <div className="h-screen w-screen bg-gradient-to-br from-cyber-darker via-cyber-gray to-cyber-green flex flex-col">
       <Header />
       
       <div className="flex-1 overflow-hidden flex flex-col">
